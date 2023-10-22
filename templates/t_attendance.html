@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Select Attendance Date</title>
+</head>
+<body>
+    <h1>Select Attendance Date</h1>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Submit Attendance</button>
+    </form>
+    <p><a href="{% url 'view_attendance' date %}">View Attendance for {{ date }}</a></p>
+</body>
+</html>

@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Check-In</title>
+</head>
+<body>
+    <h1>Check-In</h1>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit">Check In</button>
+    </form>
+    <p><a href="{% url 'view_attendance' %}">View Attendance</a></p>
+</body>
+</html>
