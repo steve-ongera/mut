@@ -126,3 +126,5 @@ LOGOUT_URL = 'logout'
 
 # Set the URL where users are redirected after logging in
 LOGIN_REDIRECT_URL = 'check_in'
+
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
