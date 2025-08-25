@@ -117,12 +117,18 @@ USE_L10N = True
 USE_TZ = True
 
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/3.1/howto/static-files/
-
+# ---------------------------
+# STATIC FILES CONFIGURATION
+# ---------------------------
 STATIC_URL = '/static/'
-LOGIN_URL = 'login'
-LOGOUT_URL = 'logout'
+STATICFILES_DIRS = [BASE_DIR / "static"]  # for local development (your project-level static files)
+STATIC_ROOT = BASE_DIR / "staticfiles"    # for production (collectstatic will dump files here)
+
+# ---------------------------
+# MEDIA FILES CONFIGURATION
+# ---------------------------
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / "media"   # where uploaded files will be stored
 
 # Set the URL where users are redirected after logging in
 LOGIN_REDIRECT_URL = 'check_in'
