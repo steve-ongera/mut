@@ -11,6 +11,8 @@ from .models import (
     AttendanceRecord, Course, Department, Faculty, Enrollment,
     Grade, AcademicYear, Semester, FeePayment, Book, BookBorrowing
 )
+from . import models
+from django.db.models import Sum
 
 
 def login_view(request):
@@ -115,7 +117,7 @@ def admin_dashboard(request):
     total_fees_paid = FeePayment.objects.filter(
         payment_date__year=current_year,
         verified=True
-    ).aggregate(total=models.Sum('amount_paid'))['total'] or 0
+    ).aggregate(total=Sum('amount_paid'))['total'] or 0
     
     context = {
         'total_students': total_students,
