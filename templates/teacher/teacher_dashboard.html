@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Dashboard - Student Management System</title>
+</head>
+<body>
+    <div class="dashboard">
+        <header class="dashboard-header">
+            <h1>Teacher Dashboard</h1>
+            <div class="user-info">
+                <span>Welcome, {{ lecturer.user.full_name }}</span>
+                <a href="{% url 'logout' %}">Logout</a>
+            </div>
+        </header>
+        
+        {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                    <div class="message {{ message.tags }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+        
+        <main class="dashboard-main">
+            <div class="profile-section">
+                <h2>Profile Information</h2>
+                <div class="profile-info">
+                    <p><strong>Employee ID:</strong> {{ lecturer.employee_id }}</p>
+                    <p><strong>Department:</strong> {{ lecturer.department.name }}</p>
+                    <p><strong>Rank:</strong> {{ lecturer.get_rank_display }}</p>
+                    <p><strong>Office:</strong> {{ lecturer.office_number|default:"Not assigned" }}</p>
+                    <p><strong>Specialization:</strong> {{ lecturer.specialization|default:"Not specified" }}</p>
+                </div>
+            </div>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3>Units Teaching</h3>
+                    <div class="stat-number">{{ total_units }}</div>
+                </div>
+                
+                <div class="stat-card">
+                    <h3>Total Students</h3>
+                    <div class="stat-number">{{ total_students }}</div>
+                </div>
+                
+                <div class="stat-card">
+                    <h3>Sessions This Week</h3>
+                    <div class="stat-number">{{ weekly_sessions }}</div>
+                </div>
+                
+                <div class="stat-card">
+                    <h3>Average Attendance Rate</h3>
+                    <div class="stat-number">{{ attendance_rate }}%</div>
+                </div>
+            </div>
+            
+            <div class="dashboard-sections">
+                <div class="section">
+                    <h2>Units You Teach</h2>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Unit Code</th>
+                                    <th>Unit Name</th>
+                                    <th>Course</th>
+                                    <th>Credit Hours</th>
+                                    <th>Enrolled Students</th>
+                                    <th>Year/Semester</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for unit in units_taught %}
+                                <tr>
+                                    <td>{{ unit.code }}</td>
+                                    <td>{{ unit.name }}</td>
+                                    <td>{{ unit.course.name }}</td>
+                                    <td>{{ unit.credit_hours }}</td>
+                                    <td>{{ unit.get_enrolled_students_count }}</td>
+                                    <td>Year {{ unit.year_offered }}, Sem {{ unit.semester_offered }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="6">No units assigned</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h2>Recent Attendance Sessions</h2>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Unit</th>
+                                    <th>Date</th>
+                                    <th>Week</th>
+                                    <th>Session Type</th>
+                                    <th>Topic</th>
+                                    <th>Duration</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for session in recent_sessions %}
+                                <tr>
+                                    <td>{{ session.unit.code }}</td>
+                                    <td>{{ session.date|date:"M d, Y" }}</td>
+                                    <td>Week {{ session.week_number }}</td>
+                                    <td>{{ session.get_session_type_display }}</td>
+                                    <td>{{ session.topic|default:"Not specified" }}</td>
+                                    <td>{{ session.duration_minutes }} mins</td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="6">No recent sessions</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h2>Students with Low Attendance (&lt;75%)</h2>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Student ID</th>
+                                    <th>Student Name</th>
+                                    <th>Unit</th>
+                                    <th>Attendance %</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in low_attendance_students %}
+                                <tr class="low-attendance">
+                                    <td>{{ item.student.student_id }}</td>
+                                    <td>{{ item.student.user.full_name }}</td>
+                                    <td>{{ item.unit.code }}</td>
+                                    <td>{{ item.attendance_percentage }}%</td>
+                                    <td>
+                                        {% if item.attendance_percentage < 50 %}
+                                            <span class="status critical">Critical</span>
+                                        {% elif item.attendance_percentage < 65 %}
+                                            <span class="status warning">Warning</span>
+                                        {% else %}
+                                            <span class="status low">Low</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="5">No students with low attendance</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h2>Pending Grades</h2>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Student</th>
+                                    <th>Unit</th>
+                                    <th>Assessment</th>
+                                    <th>Due Date</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for grade in pending_grades %}
+                                <tr>
+                                    <td>{{ grade.student.user.full_name }}</td>
+                                    <td>{{ grade.unit.code }}</td>
+                                    <td>{{ grade.assessment.title }}</td>
+                                    <td>{{ grade.assessment.due_date|date:"M d, Y" }}</td>
+                                    <td><span class="status pending">Pending</span></td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="5">No pending grades</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="quick-actions">
+                <h2>Quick Actions</h2>
+                <div class="actions-grid">
+                    <button class="action-btn">Mark Attendance</button>
+                    <button class="action-btn">Create Session</button>
+                    <button class="action-btn">Enter Grades</button>
+                    <button class="action-btn">View My Students</button>
+                    <button class="action-btn">Generate Reports</button>
+                    <button class="action-btn">Update Profile</button>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

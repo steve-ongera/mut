@@ -50,6 +50,14 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+AUTH_USER_MODEL = "attendance.CustomUser"
+
+
+AUTHENTICATION_BACKENDS = [
+    "django.contrib.auth.backends.ModelBackend",  # keep default
+]
+
+
 ROOT_URLCONF = 'mut.urls'
 
 TEMPLATES = [

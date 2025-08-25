@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard - Student Management System</title>
+</head>
+<body>
+    <div class="dashboard">
+        <header class="dashboard-header">
+            <h1>Student Dashboard</h1>
+            <div class="user-info">
+                <span>Welcome, {{ student.user.full_name }}</span>
+                <a href="{% url 'logout' %}">Logout</a>
+            </div>
+        </header>
+        
+        {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                    <div class="message {{ message.tags }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+        
+        <main class="dashboard-main">
+            <div class="profile-section">
+                <h2>Student Information</h2>
+                <div class="profile-info">
+                    <div class="profile-row">
+                        <div class="profile-col">
+                            <p><strong>Student ID:</strong> {{ student.student_id }}</p>
+                            <p><strong>Course:</strong> {{ student.course.name }}</p>
+                            <p><strong>Year of Study:</strong> {{ student.get_year_of_study_display }}</p>
+                            <p><strong>Semester:</strong> {{ student.get_semester_display }}</p>
+                        </div>
+                        <div class="profile-col">
+                            <p><strong>Admission Date:</strong> {{ student.admission_date }}</p>
+                            <p><strong>Status:</strong> {{ student.get_status_display }}</p>
+                            <p><strong>Current GPA:</strong> {{ current_gpa|floatformat:2 }}</p>
+                            <p><strong>Academic Year:</strong> {{ current_academic_year.name|default:"Not Set" }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3>Enrolled Units</h3>
+                    <div class="stat-number">{{ total_units }}</div>
+                </div>
+                
+                <div class="stat-card">
+                    <h3>Current GPA</h3>
+                    <div class="stat-number">{{ current_gpa|floatformat:2 }}</div>
+                </div>
+                
+                <div class="stat-card">
+                    <h3>Fees Paid (This Year)</h3>
+                    <div class="stat-number">KES {{ total_paid|floatformat:2 }}</div>
+                </div>
+                
+                <div class="stat-card">
+                    <h3>Books Borrowed</h3>
+                    <div class="stat-number">{{ borrowed_books|length }}</div>
+                </div>
+            </div>
+            
+            <div class="dashboard-sections">
+                <div class="section">
+                    <h2>Current Units & Attendance</h2>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Unit Code</th>
+                                    <th>Unit Name</th>
+                                    <th>Lecturer</th>
+                                    <th>Credit Hours</th>
+                                    <th>Sessions Attended</th>
+                                    <th>Total Sessions</th>
+                                    <th>Attendance %</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for unit_info in units_attendance %}
+                                <tr>
+                                    <td>{{ unit_info.unit.code }}</td>
+                                    <td>{{ unit_info.unit.name }}</td>
+                                    <td>{{ unit_info.unit.lecturer.user.full_name }}</td>
+                                    <td>{{ unit_info.unit.credit_hours }}</td>
+                                    <td>{{ unit_info.attended_sessions }}</td>
+                                    <td>{{ unit_info.total_sessions }}</td>
+                                    <td>{{ unit_info.attendance_percentage }}%</td>
+                                    <td>
+                                        {% if unit_info.attendance_percentage >= 75 %}
+                                            <span class="status good">Good</span>
+                                        {% elif unit_info.attendance_percentage >= 50 %}
+                                            <span class="status warning">Warning</span>
+                                        {% else %}
+                                            <span class="status critical">Critical</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="8">No current enrollments</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h2>Recent Grades</h2>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Unit</th>
+                                    <th>Assessment</th>
+                                    <th>Marks</th>
+                                    <th>Letter Grade</th>
+                                    <th>Grade Points</th>
+                                    <th>Date Graded</th>
+                                    <th>Graded By</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for grade in recent_grades %}
+                                <tr>
+                                    <td>{{ grade.unit.code }}</td>
+                                    <td>{{ grade.assessment.title|default:"Final Grade" }}</td>
+                                    <td>{{ grade.marks|floatformat:1 }}</td>
+                                    <td>{{ grade.letter_grade }}</td>
+                                    <td>{{ grade.get_grade_points }}</td>
+                                    <td>{{ grade.date_graded|date:"M d, Y" }}</td>
+                                    <td>{{ grade.graded_by.user.full_name }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="7">No grades available</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h2>Upcoming Sessions</h2>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Unit</th>
+                                    <th>Date & Time</th>
+                                    <th>Session Type</th>
+                                    <th>Topic</th>
+                                    <th>Duration</th>
+                                    <th>Lecturer</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for session in upcoming_sessions %}
+                                <tr>
+                                    <td>{{ session.unit.code }}</td>
+                                    <td>{{ session.date|date:"M d, Y H:i" }}</td>
+                                    <td>{{ session.get_session_type_display }}</td>
+                                    <td>{{ session.topic|default:"TBA" }}</td>
+                                    <td>{{ session.duration_minutes }} mins</td>
+                                    <td>{{ session.conducted_by.user.full_name }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="6">No upcoming sessions</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h2>Fee Payment History</h2>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Payment Date</th>
+                                    <th>Amount Paid</th>
+                                    <th>Payment Method</th>
+                                    <th>Reference Number</th>
+                                    <th>Receipt Number</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for payment in fee_payments %}
+                                <tr>
+                                    <td>{{ payment.payment_date|date:"M d, Y" }}</td>
+                                    <td>KES {{ payment.amount_paid|floatformat:2 }}</td>
+                                    <td>{{ payment.get_payment_method_display }}</td>
+                                    <td>{{ payment.reference_number }}</td>
+                                    <td>{{ payment.receipt_number }}</td>
+                                    <td>
+                                        {% if payment.verified %}
+                                            <span class="status verified">Verified</span>
+                                        {% else %}
+                                            <span class="status pending">Pending</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="6">No payment history</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h2>Library - Borrowed Books</h2>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Book Title</th>
+                                    <th>Author</th>
+                                    <th>ISBN</th>
+                                    <th>Borrow Date</th>
+                                    <th>Due Date</th>
+                                    <th>Status</th>
+                                    <th>Fine</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for borrowing in borrowed_books %}
+                                <tr>
+                                    <td>{{ borrowing.book.title }}</td>
+                                    <td>{{ borrowing.book.author }}</td>
+                                    <td>{{ borrowing.book.isbn }}</td>
+                                    <td>{{ borrowing.borrow_date|date:"M d, Y" }}</td>
+                                    <td>{{ borrowing.due_date|date:"M d, Y" }}</td>
+                                    <td>
+                                        {% if borrowing.is_overdue %}
+                                            <span class="status overdue">Overdue</span>
+                                        {% else %}
+                                            <span class="status active">Active</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if borrowing.is_overdue %}
+                                            KES {{ borrowing.calculate_fine|floatformat:2 }}
+                                        {% else %}
+                                            -
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="7">No borrowed books</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% if overdue_books %}
+                        <div class="alert warning">
+                            <p><strong>Warning:</strong> You have {{ overdue_books|length }} overdue book(s). Please return them to avoid additional fines.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="quick-actions">
+                <h2>Quick Actions</h2>
+                <div class="actions-grid">
+                    <button class="action-btn">View Full Transcript</button>
+                    <button class="action-btn">Course Registration</button>
+                    <button class="action-btn">Library Search</button>
+                    <button class="action-btn">Fee Statement</button>
+                    <button class="action-btn">Academic Calendar</button>
+                    <button class="action-btn">Update Profile</button>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>

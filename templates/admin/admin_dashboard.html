@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Student Management System</title>
+</head>
+<body>
+    <div class="dashboard">
+        <header class="dashboard-header">
+            <h1>Admin Dashboard</h1>
+            <div class="user-info">
+                <span>Welcome, {{ user.full_name }}</span>
+                <a href="{% url 'logout' %}">Logout</a>
+            </div>
+        </header>
+        
+        {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                    <div class="message {{ message.tags }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+        
+        <main class="dashboard-main">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3>Total Students</h3>
+                    <div class="stat-number">{{ total_students }}</div>
+                </div>
+                
+                <div class="stat-card">
+                    <h3>Total Lecturers</h3>
+                    <div class="stat-number">{{ total_lecturers }}</div>
+                </div>
+                
+                <div class="stat-card">
+                    <h3>Total Courses</h3>
+                    <div class="stat-number">{{ total_courses }}</div>
+                </div>
+                
+                <div class="stat-card">
+                    <h3>Total Units</h3>
+                    <div class="stat-number">{{ total_units }}</div>
+                </div>
+                
+                <div class="stat-card">
+                    <h3>Faculties</h3>
+                    <div class="stat-number">{{ total_faculties }}</div>
+                </div>
+                
+                <div class="stat-card">
+                    <h3>Departments</h3>
+                    <div class="stat-number">{{ total_departments }}</div>
+                </div>
+                
+                <div class="stat-card">
+                    <h3>Recent Enrollments (30 days)</h3>
+                    <div class="stat-number">{{ recent_enrollments }}</div>
+                </div>
+                
+                <div class="stat-card">
+                    <h3>Total Sessions</h3>
+                    <div class="stat-number">{{ total_sessions }}</div>
+                </div>
+                
+                <div class="stat-card">
+                    <h3>Overall Attendance Rate</h3>
+                    <div class="stat-number">{{ attendance_percentage }}%</div>
+                </div>
+                
+                <div class="stat-card">
+                    <h3>Total Fees Paid (This Year)</h3>
+                    <div class="stat-number">KES {{ total_fees_paid|floatformat:2 }}</div>
+                </div>
+            </div>
+            
+            <div class="dashboard-sections">
+                <div class="section">
+                    <h2>Recent Students</h2>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Student ID</th>
+                                    <th>Name</th>
+                                    <th>Course</th>
+                                    <th>Year</th>
+                                    <th>Admission Date</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for student in recent_students %}
+                                <tr>
+                                    <td>{{ student.student_id }}</td>
+                                    <td>{{ student.user.full_name }}</td>
+                                    <td>{{ student.course.name }}</td>
+                                    <td>{{ student.get_year_of_study_display }}</td>
+                                    <td>{{ student.admission_date }}</td>
+                                    <td>{{ student.get_status_display }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="6">No students found</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h2>Recent Lecturers</h2>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Employee ID</th>
+                                    <th>Name</th>
+                                    <th>Department</th>
+                                    <th>Rank</th>
+                                    <th>Hire Date</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for lecturer in recent_lecturers %}
+                                <tr>
+                                    <td>{{ lecturer.employee_id }}</td>
+                                    <td>{{ lecturer.user.full_name }}</td>
+                                    <td>{{ lecturer.department.name }}</td>
+                                    <td>{{ lecturer.get_rank_display }}</td>
+                                    <td>{{ lecturer.hire_date }}</td>
+                                    <td>{{ lecturer.get_status_display }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="6">No lecturers found</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="quick-actions">
+                <h2>Quick Actions</h2>
+                <div class="actions-grid">
+                    <button class="action-btn">Add New Student</button>
+                    <button class="action-btn">Add New Lecturer</button>
+                    <button class="action-btn">Create Course</button>
+                    <button class="action-btn">Manage Departments</button>
+                    <button class="action-btn">View Reports</button>
+                    <button class="action-btn">System Settings</button>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>
